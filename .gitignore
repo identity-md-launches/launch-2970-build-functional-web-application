@@ -1,0 +1,10 @@
+# Path budget: this file <= 512 B; generated directories 0 submitted bytes.
+**/node_modules/
+**/.cache/
+**/.vite/
+**/.npm/
+**/playwright-report/
+**/test-results/
+**/*.tsbuildinfo
+test/scratch/
+# dist/ is the required deliverable and is intentionally included.
