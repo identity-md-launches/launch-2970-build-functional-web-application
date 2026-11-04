@@ -9,7 +9,9 @@ const report = {
   checks: [],
   limitations: [],
 };
-const shots = "artifacts/screenshots";
+// Outputs go to scratch space; they are evidence for the run, not shipped files.
+const out = "test/scratch/validation";
+const shots = `${out}/screenshots`;
 await mkdir(shots, { recursive: true });
 const preview = await startPreview();
 let failures = 0;
@@ -108,7 +110,9 @@ try {
             .getByRole("link", { name: "Directory" })
             .click();
           await page
-            .getByRole("heading", { name: "Follow the hamster trail." })
+            .getByRole("heading", {
+              name: "Hamster and IMD project directory",
+            })
             .waitFor();
           assert.equal(
             await page
@@ -300,18 +304,47 @@ try {
         },
       );
       await verify(
-        name("dashboard uses directory and real local results"),
+        name("dashboard shows sourced Hamster Hour facts and local results"),
         async () => {
           await page.goto(`${preview.url}#/dashboard`);
           await page
-            .getByRole("heading", { name: "Your little corner." })
+            .getByRole("heading", { name: "Dashboard", exact: true })
             .waitFor();
           const nums = await page.locator(".stat-number").allTextContents();
           assert.equal(nums[0], "8");
           assert.equal(nums[1], "1");
           assert.ok(Number(nums[2]) > 0);
           assert.ok(Number(nums[3]) > 0);
-          assert.equal(await page.locator(".category-row").count(), 4);
+          await page
+            .getByRole("heading", { name: "Hamster Hour at a glance" })
+            .waitFor();
+          assert.equal(await page.locator(".fact-row").count(), 6);
+          const facts = await page.locator(".fact-row").evaluateAll((rows) =>
+            rows.map((row) => ({
+              label: row.querySelector("dt").textContent,
+              links: [...row.querySelectorAll("a")].map((a) => ({
+                url: a.href,
+                target: a.target,
+                rel: a.rel,
+                text: a.textContent,
+              })),
+            })),
+          );
+          for (const fact of facts) {
+            assert.ok(
+              fact.links.some((l) => l.text.startsWith("Source:")),
+              `${fact.label} needs a source link`,
+            );
+            for (const link of fact.links) {
+              assert.ok(link.url.startsWith("https://"));
+              assert.equal(link.target, "_blank");
+              assert.ok(link.rel.includes("noopener"));
+            }
+          }
+          assert.match(
+            await page.locator(".resource-map").innerText(),
+            /0x8e7c7936b4f2d4475dc4bacd174dc228d4d24e86[\s\S]*0x82f636a92364d13754d7b3e72d460f0be20a28cc/,
+          );
           assert.equal(
             await page.locator(".saved-section .project-card").count(),
             1,
@@ -549,7 +582,7 @@ try {
     "Browser emulation is not a physical-device or screen-reader test. 200% text enlargement is not native browser zoom. External links were verified as destinations, not transactions or endorsements.",
   );
   await writeFile(
-    "artifacts/browser-validation.json",
+    `${out}/browser-validation.json`,
     JSON.stringify(report, null, 2) + "\n",
   );
   console.log(JSON.stringify(report.summary));

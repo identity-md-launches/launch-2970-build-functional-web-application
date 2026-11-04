@@ -3,7 +3,13 @@ import { Icon } from "./components/Icon";
 import type { IconName } from "./components/Icon";
 import { ProjectCard } from "./components/ProjectCard";
 import { Game } from "./components/Game";
-import { CATEGORIES, PROJECTS, REVIEWED } from "./data";
+import {
+  CATEGORIES,
+  HAMSTER_FACTS,
+  HAMSTER_REPO,
+  PROJECTS,
+  REVIEWED,
+} from "./data";
 import { loadSaved, loadStats, persist } from "./storage";
 import type { PersonalStats } from "./storage";
 
@@ -48,9 +54,6 @@ function HeroArt() {
         src="./art/acorn.svg"
         alt=""
       />
-      <div className="scene-label">
-        <span className="scene-dot" />A good day to be a hamster.
-      </div>
       <span className="scene-corner corner-tl" />
       <span className="scene-corner corner-tr" />
       <span className="scene-corner corner-bl" />
@@ -113,16 +116,16 @@ function Home({
   }[] = [
     {
       icon: "grid",
-      title: "Find your bearings",
+      title: "Dashboard",
       description:
-        "See the ecosystem at a glance and keep track of your little corner.",
+        "See Hamster Hour at a glance and keep track of your saves and scores.",
       link: "dashboard",
       action: "Open dashboard",
       className: "path-peach",
     },
     {
       icon: "compass",
-      title: "Follow your curiosity",
+      title: "Project directory",
       description:
         "Discover Hamster projects, useful tools, and places to start.",
       link: "directory",
@@ -131,7 +134,7 @@ function Home({
     },
     {
       icon: "book",
-      title: "Meet the ecosystem",
+      title: "About Hamster and IMD",
       description: "Get to know Hamster, IMD, and the network connecting them.",
       link: "about",
       action: "Get to know Hamster",
@@ -143,11 +146,14 @@ function Home({
       <section className="hero content-width">
         <div className="hero-copy">
           <h1>
-            Small paws.
+            Catch acorns.
             <br />
-            <span>Big possibilities.</span>
+            <span>Find Hamster.</span>
           </h1>
-          <p>Your cozy companion to Hamster and IMD.</p>
+          <p>
+            Hamster Hub is a pocket arcade game, a link directory and a
+            dashboard for Hamster Hour and IMD.
+          </p>
           <div className="hero-actions">
             <a href="#/arcade" className="button primary">
               <Icon name="play" />
@@ -157,12 +163,6 @@ function Home({
               Explore projects
               <Icon name="arrow" />
             </a>
-          </div>
-          <div className="hero-footnote">
-            <span className="tiny-acorn">
-              <img src="./art/acorn.svg" alt="" width="24" height="24" />
-            </span>
-            <span>A little exploring. A little playing. All Hamster.</span>
           </div>
         </div>
         <HeroArt />
@@ -194,12 +194,9 @@ function Home({
       <section className="section content-width">
         <div className="section-heading">
           <div>
-            <h2>Make yourself at home.</h2>
+            <h2>Start here</h2>
             <p>A few good places to start your adventure.</p>
           </div>
-          <span className="pixel-spark" aria-hidden="true">
-            ✳
-          </span>
         </div>
         <div className="path-grid">
           {paths.map((path) => (
@@ -222,7 +219,7 @@ function Home({
       <section className="section featured-section content-width">
         <div className="section-heading">
           <div>
-            <h2>Worth a little look.</h2>
+            <h2>Featured projects</h2>
             <p>Start with Hamster. See where the trail takes you.</p>
           </div>
           <a className="text-link" href="#/directory">
@@ -248,7 +245,7 @@ function Home({
           <span />
         </div>
         <div>
-          <h2>Small creatures. Shared ecosystem.</h2>
+          <h2>About Hamster Hub</h2>
           <p>
             Hamster Hub is an independent companion for discovering Hamster and
             the IMD contributor network.
@@ -287,7 +284,7 @@ function Directory({
   };
   return (
     <div className="content-width page-content">
-      <PageHeading title="Follow the hamster trail.">
+      <PageHeading title="Hamster and IMD project directory">
         A small directory of Hamster projects and useful IMD resources.
       </PageHeading>
       <div className="directory-toolbar">
@@ -397,13 +394,14 @@ function Dashboard({
   const savedProjects = PROJECTS.filter((p) => saved.includes(p.id));
   return (
     <div className="content-width page-content">
-      <PageHeading title="Your little corner.">
+      <PageHeading title="Dashboard">
         Explore the ecosystem and keep an eye on your own adventures.
       </PageHeading>
       <div className="dashboard-note">
         <Icon name="info" />
         <span>
-          Resource overview + activity in this browser. No live blockchain feed.
+          Published Hamster Hour facts + activity in this browser. No live
+          blockchain feed.
         </span>
       </div>
       <div className="stats-grid">
@@ -470,42 +468,42 @@ function Dashboard({
         ))}
       </div>
       <div className="dashboard-columns">
-        <section className="resource-map">
+        <section className="resource-map" aria-labelledby="hamster-facts">
           <div className="section-heading">
             <div>
-              <h2>Ecosystem map</h2>
-              <p>What’s in the directory.</p>
+              <h2 id="hamster-facts">Hamster Hour at a glance</h2>
+              <p>Published facts, checked {REVIEWED}.</p>
             </div>
-            <Icon name="compass" size={28} />
+            <Icon name="clock" size={28} />
           </div>
-          <div className="category-bars">
-            {CATEGORIES.map((category) => {
-              const count = PROJECTS.filter(
-                (p) => p.category === category,
-              ).length;
-              return (
-                <div className="category-row" key={category}>
-                  <span>{category}</span>
-                  <div className="bar-track">
-                    <span
-                      style={{ width: `${(count / PROJECTS.length) * 100}%` }}
-                    />
-                  </div>
-                  <strong>{count}</strong>
-                </div>
-              );
-            })}
-          </div>
+          <dl className="fact-list">
+            {HAMSTER_FACTS.map((fact) => (
+              <div className="fact-row" key={fact.label}>
+                <dt>{fact.label}</dt>
+                <dd>
+                  {fact.code ? (
+                    <code className="fact-code">{fact.value}</code>
+                  ) : (
+                    <span className="fact-value">{fact.value}</span>
+                  )}
+                  <span className="fact-links">
+                    {fact.href && (
+                      <External href={fact.href} className="fact-link">
+                        {fact.hrefLabel}
+                      </External>
+                    )}
+                    <External href={fact.source} className="fact-link">
+                      Source: {fact.sourceLabel}
+                    </External>
+                  </span>
+                </dd>
+              </div>
+            ))}
+          </dl>
           <p className="caption">
-            {PROJECTS.length} linked resources across {CATEGORIES.length}{" "}
-            categories.
-            <br />
-            Reviewed {REVIEWED}.
+            Values as of {REVIEWED}, not a live feed. Always confirm addresses
+            on the block explorer before you use them.
           </p>
-          <a className="text-link" href="#/directory">
-            Explore every resource
-            <Icon name="arrow" size={16} />
-          </a>
         </section>
         <section className="personal-panel">
           <div className="section-heading">
@@ -601,7 +599,7 @@ function Arcade({
   return (
     <div className="content-width page-content arcade-content">
       <div className="arcade-heading">
-        <PageHeading title="A dash of hamster.">
+        <PageHeading title="Nut Dash">
           Take a 30-second break with Nut Dash, our little browser game.
         </PageHeading>
         <span className="best-label">
@@ -612,8 +610,7 @@ function Arcade({
       <div className="arcade-layout">
         <Game best={stats.best} onComplete={complete} />
         <aside className="game-guide">
-          <h2>A small mission.</h2>
-          <p>A big appetite.</p>
+          <h2>How to play</h2>
           <div className="guide-row">
             <img src="./art/acorn.svg" alt="" width="44" height="44" />
             <div>
@@ -662,7 +659,7 @@ function Arcade({
 function About() {
   return (
     <div className="content-width page-content about-content">
-      <PageHeading title="Good company. Small paws.">
+      <PageHeading title="About Hamster and IMD">
         An independent companion to Hamster and the world of IMD.
       </PageHeading>
       <div className="about-grid">
@@ -692,14 +689,18 @@ function About() {
           </span>
           <h2>What is Hamster?</h2>
           <p>
-            Here, Hamster means the playful corner of the IMD ecosystem
-            represented by Hamster Hour and its published project resources.
+            Hamster Hour is a token project launched through IMD on Ethereum:
+            the HAMSTER token and a Uniswap v4 hook for its HAMSTER/IMD pool,
+            published with documentation and tests on GitHub. Visitors trade
+            HAMSTER against IMD in that pool, and the hook’s fees fund the
+            Hamster vault’s rewards and jackpot.
           </p>
           <p>
             Several unrelated projects use the Hamster name. Use the linked
-            project sources to check you’re in the right place.
+            project sources to check you’re in the right place, and read
+            Hamster Hour’s own rules before taking part.
           </p>
-          <External href="https://github.com/identity-md-launches/launch-2336-hamster-hour">
+          <External href={HAMSTER_REPO}>
             Explore Hamster Hour’s source
           </External>
         </section>
@@ -735,10 +736,12 @@ function About() {
         <details>
           <summary>Where do dashboard numbers come from?</summary>
           <p>
-            Resource counts come from this site’s directory. Your best score,
-            completed rounds, collected acorns, and saved projects come from
-            your activity in this browser. There are no live prices, balances,
-            or blockchain statistics.
+            The Hamster Hour facts come from its published GitHub repository
+            and IMD launch job, each linked beside its value and dated with the
+            day it was checked. The resource count comes from this site’s
+            directory. Your best score, completed rounds, collected acorns, and
+            saved projects come from your activity in this browser. There are
+            no live prices, balances, or blockchain statistics.
           </p>
         </details>
         <details>
@@ -795,7 +798,7 @@ export function App() {
   useEffect(() => {
     document.title =
       page === "home"
-        ? "Hamster Hub · Small paws. Big possibilities."
+        ? "Hamster Hub · Catch acorns. Find Hamster."
         : `${NAV.find((item) => item.id === page)?.label} · Hamster Hub`;
     if (first.current) {
       first.current = false;
